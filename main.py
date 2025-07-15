@@ -112,7 +112,8 @@ for i in range(numofsibs): #siblings
     if newsib.age <= 18 and random.randrange(1,2) == 1:
         newsib.currentcountry = player.currentcountry
         newsib.currentcity = player.currentcity
-events = [event("You stubbed your toe on a [bold red]table's leg[/bold red].", [choice("Get help from Mom.", response="Mom helped you!"), choice("Get help from Dad.", response="Dad helped you!")])]
-events[0].show()
+events = [event("You stubbed your toe on a [bold red]table's leg[/bold red].", [choice("Get help from Mom.", response="Mom helped you!"), choice("Get help from Dad.", response="Dad helped you!")], condition=(player.age == 1))]
+if events[0].condition:
+    events[0].show()
 while player.alive: #main loop
     pass
