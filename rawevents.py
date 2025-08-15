@@ -1,0 +1,4 @@
+eventsraw = """[
+event("You stubbed your toe on a [bold red]table\'s leg[/bold red].", choices=[choice("Get help from Mom.", response="Mom helped you!"), choice("Get help from Dad.", response="Dad helped you!", effects=["setattr(mother, 'age', 0)"])], condition=(player.age >= 0)),
+event("You got COVID-19", choices=[choice("Don't go to the doctor", response="You are going to die.", effects=["settattr(player, 'alive', False)"]), choice("Go to the doctor", response="You are a-okay!"), choice("Do a voodoo ritual with the blood of a firstborn.", response="KSJDGFKETETSDGF", effects=["setattr(random.choice(allpeople), 'alive', False)"])], condition=(player.age >= 18))
+]"""

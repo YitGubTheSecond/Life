@@ -6,6 +6,7 @@ import random
 import rcoc #random countries and cities
 import time
 import math
+from rawevents import eventsraw
 
 allpeople = []
 console = Console()
@@ -26,19 +27,19 @@ class person: #use this to make a new person
         self.relationship = relationship
         self.relationquality = relationshipquality
         allpeople.append(self)
-class company:
-    def __init__(type):
-        match type:
-            case "Tech":
-                return "Tech Co."
-class choice:
+class choice: #choices for events
     def __init__(self, name, effects=None, response=""):
         self.name = name
         self.effects = effects
         self.response = response
     def choose(self):
-        print(f"{self.response}")
-class event:
+         print(f"{self.response}")
+        if self.effects:
+            for i in self.effects:
+                console.print("Effects:", end=" ")
+                print(i)
+                eval(i)
+class event: #life events class
     def __init__(self, description, choices, condition=True):
         self.description = description
         self.choices = choices
@@ -51,6 +52,21 @@ class event:
             num += 1
         choice = console.input("Type the number of the choice you want:")
         self.choices[int(choice)-1].choose()
+player = person() #generating family and self
+player.currentcity = player.birthcity
+player.currentcountry = player.birthcountry
+mother = person(requiredlastname=player.lastname, requiredgender="female", relationship="mother", requiredcurrentcity=player.birthcity, requiredcurrentcountry=player.birthcountry, relationshipquality=random.randrange(85, 100))
+father = person(requiredgender="male", relationship="father", requiredlastname=player.lastname, requiredcurrentcity=player.birthcity, requiredcurrentcountry=player.birthcountry, relationshipquality=random.randrange(85, 100))
+console.print(f"You are [bold purple]{player.fullname}[/bold purple]. You were born in [bold red]{player.birthplace}[/bold red] to your parents [bold purple]{mother.firstname}[/bold purple] and [bold purple]{father.firstname}[/bold purple].", end="\n \n")
+numofsibs = random.randrange(0, 4)
+a = random.randrange(4, 8)
+mother.age, father.age = random.randrange(21, 30) + a * numofsibs, random.randrange(21, 30) + a * numofsibs
+for i in range(numofsibs): #siblings
+    newsib = person(requiredlastname=player.lastname, relationship="sibling", requiredage=((mother.age - 20 - random.randrange(0, 4)) - (i * a)), requiredbirthcountry=player.currentcountry, relationshipquality=random.randrange(50, 100))
+    if newsib.age <= 18 and random.randrange(1,2) == 1:
+        newsib.currentcountry = player.currentcountry
+        newsib.currentcity = player.currentcity
+events = eval(eventsraw)
 
 def progressbar(totalpercent, currentpercent, segments, color): #returns a progress bar to showcase percentages
     final = f"[{color}]"
@@ -86,34 +102,44 @@ def displayrelations(): #menu to find people
         console.print(f"[cyan]{number}[/cyan]. [bold purple]{p.fullname}[/bold purple] ([bold blue]{(p.relationship).title()}[/bold blue])")
         console.print(Rule(characters="~", style="blue"))
         number += 1
-    person = console.input("\nType a person's number to see more details:")
+    person = console.input("\nType a person's number to see more details, or say M to go back to the main menu:")
+    if person.capitalize() == "M":
+        console.clear()
+        mainloop()
+        return
     console.clear()
     displayperson(allpeople[int(person) - 1])
-    a = console.input("Type anything to go back to menu:")
+    a = console.input("Type anything to go back to relations menu:")
     console.clear()
     displayrelations()
 def nextyear(): #ages everyone
     for i in allpeople:
         if i.alive:
             i.age += 1
-        if not i.age <= 65 and random.randrange(1, round(1000 / i.age)) == 1:
-            i.alive = False
-player = person() #generating family and self
-player.currentcity = player.birthcity
-player.currentcountry = player.birthcountry
-mother = person(requiredlastname=player.lastname, requiredgender="female", relationship="mother", requiredcurrentcity=player.birthcity, requiredcurrentcountry=player.birthcountry, relationshipquality=random.randrange(85, 100))
-father = person(requiredgender="male", relationship="father", requiredlastname=player.lastname, requiredcurrentcity=player.birthcity, requiredcurrentcountry=player.birthcountry, relationshipquality=random.randrange(85, 100))
-console.print(f"You are [bold purple]{player.fullname}[/bold purple]. You were born in [bold red]{player.birthplace}[/bold red] to your parents [bold purple]{mother.firstname}[/bold purple] and [bold purple]{father.firstname}[/bold purple].", end="\n \n")
-numofsibs = random.randrange(0, 4)
-a = random.randrange(4, 8)
-mother.age, father.age = random.randrange(21, 30) + a * numofsibs, random.randrange(21, 30) + a * numofsibs
-for i in range(numofsibs): #siblings
-    newsib = person(requiredlastname=player.lastname, relationship="sibling", requiredage=((mother.age - 20 - random.randrange(0, 4)) - (i * a)), requiredbirthcountry=player.currentcountry, relationshipquality=random.randrange(50, 100))
-    if newsib.age <= 18 and random.randrange(1,2) == 1:
-        newsib.currentcountry = player.currentcountry
-        newsib.currentcity = player.currentcity
-events = [event("You stubbed your toe on a [bold red]table's leg[/bold red].", [choice("Get help from Mom.", response="Mom helped you!"), choice("Get help from Dad.", response="Dad helped you!")], condition=(player.age == 1))]
-if events[0].condition:
-    events[0].show()
-while player.alive: #main loop
-    pass
+            if not i.age <= 65 and random.randrange(1, round(1000 / i.age)) == 1:
+                console.print(f"[bold red]Your {i.relationship}, {i.fullname}, died at age {i.age}.[/bold red]")
+                i.alive = False
+        eventfound = False
+        while not eventfound:
+            currentevent = random.choice(events)
+            if currentevent.condition:
+                eventfound = True
+                currentevent.show() 
+        console.clear()
+        mainloop()
+def mainloop():
+    if player.alive:
+        console.print(f"{player.fullname}, {player.gender}")
+        decision = console.input(f"Year {player.age}. [bold red]Continue to next year (C)[/bold red], [bold blue]See relationships (R)[/bold blue], [bold yellow]Actions and properties (A)[/bold yellow]:")
+        match decision.capitalize():
+            case "C":
+                console.clear()
+                nextyear()
+            case "R":
+                displayrelations()
+    else:
+        console.clear()
+        console.print(f"[bold red]You died at age {player.age}![/bold red]")
+time.sleep(2)
+console.clear()
+mainloop()
